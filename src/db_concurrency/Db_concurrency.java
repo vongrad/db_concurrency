@@ -5,6 +5,8 @@
  */
 package db_concurrency;
 
+import java.sql.Connection;
+
 /**
  *
  * @author adamv
@@ -15,7 +17,10 @@ public class Db_concurrency {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
+        DBConnector connector = new DBConnector();
+        Connection conn = connector.getConnection();
+        
+        
     }
     
 }
