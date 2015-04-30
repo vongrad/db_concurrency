@@ -15,33 +15,33 @@ import java.sql.SQLException;
  */
 public class DBConnector {
 
-    public static String USERNAME = "DB_039";
-    public static String PASSWORD = "db2015";
-    public static String HOST = "datdb.cphbusiness.dk";
-    public static String PORT = "1521";
-    public static String SID = "dat";
+	public static String USERNAME = "DB_039";
+	public static String PASSWORD = "db2015";
+	public static String HOST = "datdb.cphbusiness.dk";
+	public static String PORT = "1521";
+	public static String SID = "dat";
 
-    public Connection getConnection() {
+	public Connection getConnection() {
 
-        try {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
+		try {
+			Class.forName("oracle.jdbc.driver.OracleDriver");
 
-        } catch (ClassNotFoundException e) {
-            System.out.println("JDBC Driver not found");
-            e.printStackTrace();
-            return null;
-        }
-        Connection connection = null;
-        try {
-            connection = DriverManager.getConnection("jdbc:oracle:thin:@" + HOST + ":" + PORT + ":" + SID, USERNAME, PASSWORD);
+		} catch (ClassNotFoundException e) {
+			System.out.println("JDBC Driver not found");
+			e.printStackTrace();
+			return null;
+		}
+		Connection connection = null;
+		try {
+			connection = DriverManager.getConnection("jdbc:oracle:thin:@" + HOST + ":" + PORT + ":" + SID, USERNAME, PASSWORD);
 
-        } catch (SQLException e) {
+		} catch (SQLException e) {
 
-            System.out.println("Connection Failed! Check output console");
-            e.printStackTrace();
-            return null;
-        }
-        return connection;
-    }
+			System.out.println("Connection Failed! Check output console");
+			e.printStackTrace();
+			return null;
+		}
+		return connection;
+	}
 
 }

@@ -12,11 +12,9 @@ import java.util.Random;
  * @author adamv
  */
 public class Toolkit {
-    
-    public static int getSleepTime(int min, int max){
-        Random rn = new Random();
-        int range = min - max + 1;
-        return rn.nextInt(range) + min;
-    }
-    
+	public static int getSleepTime(int min, int max) {
+		Random rn = new Random();
+		int range = min - max + 1;
+		return rn.nextInt(range) + min;
+	}
 }

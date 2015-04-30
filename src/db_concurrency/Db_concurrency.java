@@ -13,14 +13,13 @@ import java.sql.Connection;
  */
 public class Db_concurrency {
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        DBConnector connector = new DBConnector();
-        Connection conn = connector.getConnection();
-        
-        
-    }
-    
+	/**
+	 * @param args the command line arguments
+	 */
+	public static void main(String[] args) {
+		DBConnector connector = new DBConnector();
+		Connection conn = connector.getConnection();
+
+	}
+
 }
