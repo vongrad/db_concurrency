@@ -32,10 +32,17 @@ public class Client implements Runnable {
 		reservedSeatNr = reservation.reserve(plane_nr, clientid);
 		if(reservedSeatNr == null) {
 			return;
-		}
+                }
+                
 		sleepThisThreadRandom(5, 100);
+                
+                if(!makeBooking()){
+                    return;
+                }
+                
 		bookingCode = reservation.book(plane_nr, reservedSeatNr, clientid);
 		
+                
 /*
 		if (!reservation.isAllReserved(plane_nr)) {
 			reservedSeatNr = reservation.reserve(plane_nr, clientid);
@@ -65,4 +72,10 @@ public class Client implements Runnable {
 	public Reservation.ReturnTypes getBookingCode() {
 		return bookingCode;
 	}
+        
+        
+        public boolean makeBooking(){
+            int decision = Toolkit.getSleepTime(0, 1);
+            return decision == 1;
+        }
 }
