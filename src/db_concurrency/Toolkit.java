@@ -14,7 +14,7 @@ import java.util.Random;
 public class Toolkit {
 	public static int getSleepTime(int min, int max) {
 		Random rn = new Random();
-		int range = min - max + 1;
+		int range = max - min + 1;
 		return rn.nextInt(range) + min;
 	}
 }

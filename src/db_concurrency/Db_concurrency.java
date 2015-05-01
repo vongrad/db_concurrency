@@ -5,6 +5,7 @@
  */
 package db_concurrency;
 
+import db_concurrency.connector.OracleConnector;
 import java.sql.Connection;
 
 /**
@@ -17,7 +18,7 @@ public class Db_concurrency {
 	 * @param args the command line arguments
 	 */
 	public static void main(String[] args) {
-		DBConnector connector = new DBConnector();
+		OracleConnector connector = new OracleConnector();
 		Connection conn = connector.getConnection();
 
 	}

@@ -5,6 +5,8 @@
  */
 package db_concurrency;
 
+import db_concurrency.connector.IConnector;
+import db_concurrency.connector.OraclePoolConnector;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,25 +20,20 @@ import javax.sound.midi.SysexMessage;
  * @author adamv
  */
 public class Reservation {
-	private Connection conn;
+	private IConnector connector;
 	private static final long EXPIRES_AFTER = 50;
 
 	protected enum ReturnTypes {
 		success, not_reserved, reserved_other, reservation_timeout, occupied, other_error
 	}
 
-	public Reservation() {
-		try {
-			//conn = new DBConnector().getConnection();
-			conn = ConnectionPool.getOracleConnection();
-		} catch (SQLException ex) {
-			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
-		}
+	public Reservation(IConnector connector) {
+			this.connector = connector;
 	}
 
 	public String reserve(String plane_no, long userid) {
 		try {
-			PreparedStatement ps = conn.prepareStatement("SELECT seat_no FROM plane WHERE (reserved = ?  OR booking_time  < ?)"
+			PreparedStatement ps = connector.getConnection().prepareStatement("SELECT seat_no FROM plane WHERE (reserved = ?  OR booking_time  < ?)"
 					+ "AND plane_no = ? AND booked = ? AND rownum = 1 ");
 
 			ps.setString(1, null);
@@ -51,7 +48,7 @@ public class Reservation {
 
 			String seat_nr = rs.getString("seat_no");
 
-			ps = conn.prepareStatement("UPDATE plane SET reserved = ? WHERE seat_nr = ?");
+			ps = connector.getConnection().prepareStatement("UPDATE plane SET reserved = ? WHERE seat_nr = ?");
 			ps.setLong(1, userid);
 			ps.setString(2, seat_nr);
 
@@ -66,7 +63,7 @@ public class Reservation {
 	public Reservation.ReturnTypes book(String plane_no, String seat_no, long userid) {
 		try {
 
-			PreparedStatement ps = conn.prepareStatement("SELECT * FROM plane WHERE plane_nr = ?"
+			PreparedStatement ps = connector.getConnection().prepareStatement("SELECT * FROM plane WHERE plane_nr = ?"
 					+ "AND seat_nr = ?");
 
 			ps.setString(1, plane_no);
@@ -94,7 +91,7 @@ public class Reservation {
 				return ReturnTypes.occupied;
 			}
 
-			ps = conn.prepareStatement("UPDATE plane SET booked = ?, booking_time = ? WHERE plane_no = ? AND seat_no = ?");
+			ps = connector.getConnection().prepareStatement("UPDATE plane SET booked = ?, booking_time = ? WHERE plane_no = ? AND seat_no = ?");
 			ps.setLong(1, userid);
 			ps.setLong(2, System.currentTimeMillis());
 			ps.setString(3, plane_no);
@@ -112,7 +109,7 @@ public class Reservation {
 
 	public int bookAll(String plane_no, long userid) {
 		try {
-			PreparedStatement ps = conn.prepareStatement("UPDATE plane SET booked = ? WHERE plane_no = ? AND booked = ?");
+			PreparedStatement ps = connector.getConnection().prepareStatement("UPDATE plane SET booked = ? WHERE plane_no = ? AND booked = ?");
 			ps.setLong(1, userid);
 			ps.setString(2, plane_no);
 			ps.setString(3, null);
@@ -125,7 +122,7 @@ public class Reservation {
 
 	public int clearAllBookings(String plane_no) {
 		try {
-			PreparedStatement ps = conn.prepareStatement("UPDATE plane SET booked = ?, reserved = ?, booking_time = ? WHERE plane_no = ?");
+			PreparedStatement ps = connector.getConnection().prepareStatement("UPDATE plane SET booked = ?, reserved = ?, booking_time = ? WHERE plane_no = ?");
 			ps.setString(1, null);
 			ps.setString(2, null);
 			ps.setLong(3, 0);
@@ -139,7 +136,7 @@ public class Reservation {
 
 	public boolean isAllBooked(String plane_no) {
 		try {
-			PreparedStatement ps = conn.prepareStatement("SELECT count(*) as count FROM plane WHERE booked = ? AND plane_no = ?");
+			PreparedStatement ps = connector.getConnection().prepareStatement("SELECT count(*) as count FROM plane WHERE booked = ? AND plane_no = ?");
 			ps.setString(1, "");
 			ps.setString(2, plane_no);
 			ResultSet results = ps.executeQuery();
@@ -155,7 +152,7 @@ public class Reservation {
 
 	public boolean isAllReserved(String plane_no) {
 		try {
-			PreparedStatement ps = conn.prepareStatement("SELECT count(*) as count FROM plane WHERE reserved = ? AND plane_no = ?");
+			PreparedStatement ps = connector.getConnection().prepareStatement("SELECT count(*) as count FROM plane WHERE reserved = ? AND plane_no = ?");
 			ps.setString(1, "");
 			ps.setString(2, plane_no);
 			ResultSet results = ps.executeQuery();

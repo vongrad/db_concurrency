@@ -20,10 +20,10 @@ public class Client implements Runnable {
 	private String reservedSeatNr;
 	private Reservation.ReturnTypes bookingCode;
 
-	public Client(int clientid, String plane_nr) {
+	public Client(Reservation reservation, int clientid, String plane_nr) {
 		this.plane_nr = plane_nr;
 		this.clientid = clientid;
-		this.reservation = new Reservation();
+		this.reservation = reservation;
 	}
 
 	@Override
