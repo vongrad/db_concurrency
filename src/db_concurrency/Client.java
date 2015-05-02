@@ -5,6 +5,7 @@
  */
 package db_concurrency;
 
+import db_concurrency.connector.OraclePoolConnector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,39 +29,36 @@ public class Client implements Runnable {
 
 	@Override
 	public void run() {
-		sleepThisThreadRandom(1, 10);
+		Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " START");
+		sleepThisThreadRandom(1, 1000);
 		reservedSeatNr = reservation.reserve(plane_nr, clientid);
 		if(reservedSeatNr == null) {
+			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " NO RESERVATION");
+			System.out.println("Client [" + clientid + "]: Could not get RESERVATION");
 			return;
-                }
-                
-		sleepThisThreadRandom(5, 100);
-                
-                if(!makeBooking()){
-                    return;
-                }
-                
-		bookingCode = reservation.book(plane_nr, reservedSeatNr, clientid);
-		
-                
-/*
-		if (!reservation.isAllReserved(plane_nr)) {
-			reservedSeatNr = reservation.reserve(plane_nr, clientid);
-		} else {
-			reservedSeatNr = null;
-			return;
-		}*/
-
-/*		if (!reservation.isAllBooked(plane_nr)) {
-
 		}
-		*/
+
+		sleepThisThreadRandom(5, 1000);
+		Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " AFTER SLEEP");
+
+		if(!makeBooking()) {
+			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " DON'T NEED BOOKING");
+			System.out.println("Client [" + clientid + "]: Decided to NO BOOKING");
+			return;
+		}
+
+		Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " BEFORE BOOKING");
+		bookingCode = reservation.book(plane_nr, reservedSeatNr, clientid);
+		Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " FINISHED BOOKING");
+		System.out.println("Client [" + clientid + "]: " + bookingCode);
 	}
 
 	private void sleepThisThreadRandom(int fromMilli, int toMilli) {
 		try {
-			Thread.sleep(Toolkit.getSleepTime(fromMilli, toMilli));
-		} catch (InterruptedException ex) {
+			int x = Toolkit.getSleepTime(fromMilli, toMilli);
+			System.out.println("Sleep time: " + x);
+			Thread.sleep(x);
+		} catch(InterruptedException ex) {
 			Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
@@ -72,10 +70,9 @@ public class Client implements Runnable {
 	public Reservation.ReturnTypes getBookingCode() {
 		return bookingCode;
 	}
-        
-        
-        public boolean makeBooking(){
-            int decision = Toolkit.getSleepTime(0, 1);
-            return decision == 1;
-        }
+
+	public boolean makeBooking() {
+		int decision = Toolkit.getSleepTime(0, 1);
+		return decision == 1;
+	}
 }

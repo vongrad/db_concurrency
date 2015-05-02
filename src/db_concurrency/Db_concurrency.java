@@ -19,8 +19,6 @@ public class Db_concurrency {
 	 */
 	public static void main(String[] args) {
 		OracleConnector connector = new OracleConnector();
-		Connection conn = connector.getConnection();
-
 	}
 
 }
