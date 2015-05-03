@@ -7,15 +7,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-/**
- *
- * @author Preuss
- */
 public class DBCredentials {
 	private static String USERNAME = "DB_039";
 	private static String PASSWORD = "db2015";
