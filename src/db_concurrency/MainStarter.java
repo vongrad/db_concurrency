@@ -5,6 +5,7 @@
  */
 package db_concurrency;
 
+import db_concurrency.connector.DBCredentials;
 import db_concurrency.connector.IConnector;
 import db_concurrency.connector.OraclePoolConnector;
 
@@ -21,6 +22,7 @@ public class MainStarter {
 		 System.out.println("Created Tables: " + output);
 		 */
 
+		r.clearAllBookings("CR9");
 		Master m = new Master(10, conn);
 		new Thread(m).start();
 	}

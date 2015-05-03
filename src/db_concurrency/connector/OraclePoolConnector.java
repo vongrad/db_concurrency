@@ -14,13 +14,13 @@ import javax.activation.DataSource;
  * @author adamv
  */
 public class OraclePoolConnector implements IConnector {
-	private static String USERNAME = "DB_039";
-	private static String PASSWORD = "db2015";
-	private static String HOST_NAME = "datdb.cphbusiness.dk";
-	private static String PORT = "1521";
-	private static String SID = "dat";
-	private static String DRIVER_CLASS = "oracle.jdbc.driver.OracleDriver";
-	private static String JDBC_URL = "jdbc:oracle:thin:@" + HOST_NAME + ":" + PORT + ":" + SID;
+	private static String USERNAME = DBCredentials.getUSERNAME();
+	private static String PASSWORD = DBCredentials.getPASSWORD();
+	private static String HOST_NAME = DBCredentials.getHOST_NAME();
+	private static String PORT = DBCredentials.getPORT();
+	private static String SID = DBCredentials.getSID();
+	private static String DRIVER_CLASS = DBCredentials.getDRIVER_CLASS();
+	private static String JDBC_URL = DBCredentials.getJDBC_URL();
 
 	private static ComboPooledDataSource dataSource = setupDataSource();
 

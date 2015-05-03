@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  */
 public class Reservation {
 	private IConnector connector;
-	private static final long EXPIRES_AFTER = 5000;
+	private static final long EXPIRES_AFTER = 1000;
 
 	protected enum ReturnTypes {
 		success, not_reserved, reserved_other, reservation_timeout, occupied, other_error
@@ -242,6 +242,7 @@ public class Reservation {
 	}
 
 	public int clearAllBookings(String plane_no) {
+		System.out.println("CLEAR ALL BOOKINGS");
 		Connection conn = null;
 		try {
 			conn = connector.getConnection();

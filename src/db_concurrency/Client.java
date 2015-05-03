@@ -6,6 +6,7 @@
 package db_concurrency;
 
 import db_concurrency.connector.OraclePoolConnector;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,7 +31,7 @@ public class Client implements Runnable {
 	@Override
 	public void run() {
 		Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " START");
-		sleepThisThreadRandom(1, 1000);
+		sleepThisThreadRandom(1, 500);
 		reservedSeatNr = reservation.reserve(plane_nr, clientid);
 		if(reservedSeatNr == null) {
 			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " NO RESERVATION");
@@ -38,10 +39,10 @@ public class Client implements Runnable {
 			return;
 		}
 
-		sleepThisThreadRandom(5, 1000);
+		sleepThisThreadRandom(5, 500);
 		Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " AFTER SLEEP");
 
-		if(!makeBooking()) {
+		if(!makeBooking(25)) {
 			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " DON'T NEED BOOKING");
 			System.out.println("Client [" + clientid + "]: Decided to NO BOOKING");
 			return;
@@ -71,8 +72,11 @@ public class Client implements Runnable {
 		return bookingCode;
 	}
 
-	public boolean makeBooking() {
-		int decision = Toolkit.getSleepTime(0, 1);
-		return decision == 1;
+	public boolean makeBooking(int wantsToBookPercentPoint) {
+		if(wantsToBookPercentPoint < 0 || wantsToBookPercentPoint > 100) {
+			throw new IllegalArgumentException();
+		}
+		int percent = new Random().nextInt(100);
+		return percent <= wantsToBookPercentPoint;
 	}
 }
