@@ -1,11 +1,8 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package db_concurrency;
 
+import db_concurrency.connector.IConnector;
 import db_concurrency.connector.OraclePoolConnector;
+import java.sql.Connection;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,50 +12,65 @@ import java.util.logging.Logger;
  * @author adamv
  */
 public class Client implements Runnable {
-	private int clientid;
+	private int clientId;
+
 	private String plane_nr;
 	private Reservation reservation;
 
 	private String reservedSeatNr;
-	private Reservation.ReturnTypes bookingCode;
+	private StatisticResult bookingCode;
+	private IStatistics stats;
 
-	public Client(Reservation reservation, int clientid, String plane_nr) {
+	public Client(Connection connection, int clientid, String plane_nr, IStatistics stats) {
 		this.plane_nr = plane_nr;
-		this.clientid = clientid;
-		this.reservation = reservation;
+		this.clientId = clientid;
+		this.reservation = new Reservation(connection);
+		this.stats = stats;
 	}
 
 	@Override
 	public void run() {
-		Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " START");
-		sleepThisThreadRandom(1, 500);
-		reservedSeatNr = reservation.reserve(plane_nr, clientid);
-		if(reservedSeatNr == null) {
-			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " NO RESERVATION");
-			System.out.println("Client [" + clientid + "]: Could not get RESERVATION");
-			return;
+		try {
+			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientId + " START");
+			//sleepThisThreadRandom(Reservation.EXPIRES_AFTER / 10, Reservation.EXPIRES_AFTER);
+			reservedSeatNr = reservation.reserve(plane_nr, clientId);
+			if(reservedSeatNr == null) {
+				Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientId + " NO RESERVATION");
+				System.out.println("Client [" + clientId + "]: Could not get RESERVATION");
+				stats.putStat(clientId, StatisticResult.COULD_NOT_RESERVE);
+				return;
+			}
+
+			sleepThisThreadRandom((Reservation.EXPIRES_AFTER / 2), (Reservation.EXPIRES_AFTER * 2));
+			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientId + " AFTER SLEEP");
+
+			if(!makeBooking(25)) {
+				Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientId + " DON'T NEED BOOKING");
+				System.out.println("Client [" + clientId + "]: Decided to NO BOOKING");
+				stats.putStat(clientId, StatisticResult.RESERVED_DECIDED_NOT_TO_BOOK);
+				return;
+			}
+
+			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientId + " BEFORE BOOKING");
+			bookingCode = reservation.book(plane_nr, reservedSeatNr, clientId);
+			StatisticResult result = null;
+			stats.putStat(clientId, bookingCode);
+			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientId + " FINISHED BOOKING");
+			System.out.println("Client [" + clientId + "]: " + bookingCode);
+		} finally {
+			try {
+				reservation.close();
+			} catch(Exception ex) {
+				Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
+			}
 		}
-
-		sleepThisThreadRandom(5, 500);
-		Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " AFTER SLEEP");
-
-		if(!makeBooking(25)) {
-			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " DON'T NEED BOOKING");
-			System.out.println("Client [" + clientid + "]: Decided to NO BOOKING");
-			return;
-		}
-
-		Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " BEFORE BOOKING");
-		bookingCode = reservation.book(plane_nr, reservedSeatNr, clientid);
-		Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " FINISHED BOOKING");
-		System.out.println("Client [" + clientid + "]: " + bookingCode);
 	}
 
-	private void sleepThisThreadRandom(int fromMilli, int toMilli) {
+	private void sleepThisThreadRandom(long fromMilli, long toMilli) {
 		try {
-			int x = Toolkit.getSleepTime(fromMilli, toMilli);
-			System.out.println("Sleep time: " + x);
-			Thread.sleep(x);
+			long sleepTime = Toolkit.getSleepTime(fromMilli, toMilli);
+			System.out.println("Sleep time: " + sleepTime);
+			Thread.sleep(sleepTime);
 		} catch(InterruptedException ex) {
 			Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -68,7 +80,7 @@ public class Client implements Runnable {
 		return reservedSeatNr;
 	}
 
-	public Reservation.ReturnTypes getBookingCode() {
+	public StatisticResult getBookingCode() {
 		return bookingCode;
 	}
 
@@ -78,5 +90,9 @@ public class Client implements Runnable {
 		}
 		int percent = new Random().nextInt(100);
 		return percent <= wantsToBookPercentPoint;
+	}
+
+	public int getClientId() {
+		return clientId;
 	}
 }
