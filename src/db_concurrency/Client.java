@@ -5,6 +5,7 @@
  */
 package db_concurrency;
 
+import db_concurrency.connector.IConnector;
 import db_concurrency.connector.OraclePoolConnector;
 import java.util.Random;
 import java.util.logging.Level;
@@ -22,36 +23,40 @@ public class Client implements Runnable {
 	private String reservedSeatNr;
 	private Reservation.ReturnTypes bookingCode;
 
-	public Client(Reservation reservation, int clientid, String plane_nr) {
+	public Client(IConnector connector, int clientid, String plane_nr) {
 		this.plane_nr = plane_nr;
 		this.clientid = clientid;
-		this.reservation = reservation;
+		this.reservation = new Reservation(connector);;
 	}
 
 	@Override
 	public void run() {
-		Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " START");
-		sleepThisThreadRandom(1, 500);
-		reservedSeatNr = reservation.reserve(plane_nr, clientid);
-		if(reservedSeatNr == null) {
-			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " NO RESERVATION");
-			System.out.println("Client [" + clientid + "]: Could not get RESERVATION");
-			return;
+		try {
+			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " START");
+			sleepThisThreadRandom(1, 500);
+			reservedSeatNr = reservation.reserve(plane_nr, clientid);
+			if(reservedSeatNr == null) {
+				Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " NO RESERVATION");
+				System.out.println("Client [" + clientid + "]: Could not get RESERVATION");
+				return;
+			}
+
+			sleepThisThreadRandom(5, 500);
+			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " AFTER SLEEP");
+
+			if(!makeBooking(25)) {
+				Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " DON'T NEED BOOKING");
+				System.out.println("Client [" + clientid + "]: Decided to NO BOOKING");
+				return;
+			}
+
+			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " BEFORE BOOKING");
+			bookingCode = reservation.book(plane_nr, reservedSeatNr, clientid);
+			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " FINISHED BOOKING");
+			System.out.println("Client [" + clientid + "]: " + bookingCode);
+		} finally {
+			reservation.closeConnection();
 		}
-
-		sleepThisThreadRandom(5, 500);
-		Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " AFTER SLEEP");
-
-		if(!makeBooking(25)) {
-			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " DON'T NEED BOOKING");
-			System.out.println("Client [" + clientid + "]: Decided to NO BOOKING");
-			return;
-		}
-
-		Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " BEFORE BOOKING");
-		bookingCode = reservation.book(plane_nr, reservedSeatNr, clientid);
-		Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " FINISHED BOOKING");
-		System.out.println("Client [" + clientid + "]: " + bookingCode);
 	}
 
 	private void sleepThisThreadRandom(int fromMilli, int toMilli) {

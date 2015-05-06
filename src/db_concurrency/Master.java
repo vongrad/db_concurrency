@@ -98,6 +98,6 @@ public class Master implements Runnable {
 	}
 
 	private void spawnClient(ThreadPoolExecutor executor) {
-		executor.execute(new Client(res, nextThreadClientId(), getPlaneNr()));
+		executor.execute(new Client(conn, nextThreadClientId(), getPlaneNr()));
 	}
 }

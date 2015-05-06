@@ -19,21 +19,27 @@ import java.util.logging.Logger;
  */
 public class Reservation {
 	private IConnector connector;
-	private static final long EXPIRES_AFTER = 1000;
+	private Connection conn;
+	private static final long EXPIRES_AFTER = 50;
 
 	protected enum ReturnTypes {
 		success, not_reserved, reserved_other, reservation_timeout, occupied, other_error
 	}
 
 	public Reservation(IConnector connector) {
-		this.connector = connector;
+		try {
+			this.connector = connector;
+			this.conn = connector.getConnection();
+		} catch(SQLException ex) {
+			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
+		}
 	}
 
 	public boolean createTables() {
 		boolean retVal = false;
-		Connection conn = null;
+		//Connection conn = null;
 		try {
-			conn = connector.getConnection();
+			//conn = connector.getConnection();
 			PreparedStatement ps1 = conn.prepareCall(
 					"BEGIN\n"
 					+ "	EXECUTE IMMEDIATE 'DROP TABLE seat';\n"
@@ -91,20 +97,22 @@ public class Reservation {
 			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 			retVal = false;
 		} finally {
+			/*
 			if(conn != null) {
 				try {
 					conn.close();
 				} catch(SQLException ignore) {
 				}
 			}
+					*/
 		}
 		return retVal;
 	}
 
 	public String reserve(String plane_no, long userid) {
-		Connection conn = null;
+		//Connection conn = null;
 		try {
-			conn = connector.getConnection();
+			//conn = connector.getConnection();
 
 			PreparedStatement ps;
 			int idx;
@@ -138,21 +146,23 @@ public class Reservation {
 			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 			return null;
 		} finally {
+			/*
 			if(conn != null) {
 				try {
 					conn.close();
 				} catch(SQLException ignore) {
 				}
 			}
+			*/
 		}
 	}
 
 	public Reservation.ReturnTypes book(String plane_no, String seat_no, long userid) {
-		Connection conn = null;
+		//Connection conn = null;
 		try {
 			long currentTime = System.currentTimeMillis();
 
-			conn = connector.getConnection();
+			//conn = connector.getConnection();
 			PreparedStatement ps = conn.prepareStatement(
 					"SELECT * "
 					+ "FROM seat "
@@ -183,6 +193,12 @@ public class Reservation {
 			if(rs.getString("booked") != null) {
 				return ReturnTypes.occupied;
 			}
+			
+			try {
+				Thread.sleep(Toolkit.getSleepTime(10, 70));
+			} catch(InterruptedException ex) {
+				Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
+			}
 
 			ps = conn.prepareStatement(
 					"UPDATE seat "
@@ -202,19 +218,21 @@ public class Reservation {
 			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 			return ReturnTypes.other_error;
 		} finally {
+			/*
 			if(conn != null) {
 				try {
 					conn.close();
 				} catch(SQLException ignore) {
 				}
 			}
+			*/
 		}
 	}
 
 	public int bookAll(String plane_no, long userid) {
-		Connection conn = null;
+		//Connection conn = null;
 		try {
-			conn = connector.getConnection();
+			//conn = connector.getConnection();
 			PreparedStatement ps = conn.prepareStatement(
 					"UPDATE seat "
 					+ "SET reserved = ?, booked = ?, booking_time = ? "
@@ -232,20 +250,22 @@ public class Reservation {
 			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 			return -1;
 		} finally {
+			/*
 			if(conn != null) {
 				try {
 					conn.close();
 				} catch(SQLException ignore) {
 				}
 			}
+			*/
 		}
 	}
 
 	public int clearAllBookings(String plane_no) {
 		System.out.println("CLEAR ALL BOOKINGS");
-		Connection conn = null;
+		//Connection conn = null;
 		try {
-			conn = connector.getConnection();
+			//conn = connector.getConnection();
 			PreparedStatement ps = conn.prepareStatement(
 					"UPDATE seat "
 					+ "SET booked = null, reserved = null, booking_time = null "
@@ -257,19 +277,21 @@ public class Reservation {
 			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 			return -1;
 		} finally {
+			/*
 			if(conn != null) {
 				try {
 					conn.close();
 				} catch(SQLException ignore) {
 				}
 			}
+			*/
 		}
 	}
 
 	public boolean isAllBooked(String plane_no) {
-		Connection conn = null;
+		//Connection conn = null;
 		try {
-			conn = connector.getConnection();
+			//conn = connector.getConnection();
 			PreparedStatement ps = conn.prepareStatement(
 					"SELECT count(*) as count "
 					+ "FROM seat "
@@ -285,19 +307,21 @@ public class Reservation {
 			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 			return false;
 		} finally {
+			/*
 			if(conn != null) {
 				try {
 					conn.close();
 				} catch(SQLException ignore) {
 				}
 			}
+					*/
 		}
 	}
 
 	public boolean isAllReserved(String plane_no) {
-		Connection conn = null;
+		//Connection conn = null;
 		try {
-			conn = connector.getConnection();
+			//conn = connector.getConnection();
 			PreparedStatement ps = conn.prepareStatement(
 					"SELECT count(*) as count "
 					+ "FROM seat "
@@ -313,11 +337,23 @@ public class Reservation {
 			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 			return false;
 		} finally {
+			/*
 			if(conn != null) {
 				try {
 					conn.close();
 				} catch(SQLException ignore) {
 				}
+			}
+			*/
+		}
+	}
+	
+	public void closeConnection(){
+		if(conn != null){
+			try {
+				conn.close();
+			} catch(SQLException ex) {
+				Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
 	}
