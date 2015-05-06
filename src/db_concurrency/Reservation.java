@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package db_concurrency;
 
 import db_concurrency.connector.IConnector;
@@ -17,6 +12,7 @@ import java.util.logging.Logger;
  *
  * @author adamv
  */
+<<<<<<< HEAD
 public class Reservation {
 	private IConnector connector;
 	private Connection conn;
@@ -33,13 +29,27 @@ public class Reservation {
 		} catch(SQLException ex) {
 			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 		}
+=======
+public class Reservation implements AutoCloseable {
+	private Connection connection;
+	public static final long EXPIRES_AFTER = 5000;
+
+	public Reservation(Connection connection) {
+		this.connection = connection;
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 	}
 
 	public boolean createTables() {
 		boolean retVal = false;
+<<<<<<< HEAD
 		//Connection conn = null;
 		try {
 			//conn = connector.getConnection();
+=======
+		Connection conn = connection;
+		try {
+//			conn = connector.getConnection();
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 			PreparedStatement ps1 = conn.prepareCall(
 					"BEGIN\n"
 					+ "	EXECUTE IMMEDIATE 'DROP TABLE seat';\n"
@@ -96,23 +106,37 @@ public class Reservation {
 		} catch(SQLException ex) {
 			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 			retVal = false;
+<<<<<<< HEAD
 		} finally {
 			/*
+=======
+		}/* finally {
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 			if(conn != null) {
 				try {
 					conn.close();
 				} catch(SQLException ignore) {
 				}
 			}
+<<<<<<< HEAD
 					*/
 		}
+=======
+		}*/
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 		return retVal;
 	}
 
 	public String reserve(String plane_no, long userid) {
+<<<<<<< HEAD
 		//Connection conn = null;
 		try {
 			//conn = connector.getConnection();
+=======
+		Connection conn = connection;
+		try {
+//			conn = connector.getConnection();
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 
 			PreparedStatement ps;
 			int idx;
@@ -145,14 +169,19 @@ public class Reservation {
 		} catch(SQLException ex) {
 			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 			return null;
+<<<<<<< HEAD
 		} finally {
 			/*
+=======
+		}/* finally {
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 			if(conn != null) {
 				try {
 					conn.close();
 				} catch(SQLException ignore) {
 				}
 			}
+<<<<<<< HEAD
 			*/
 		}
 	}
@@ -163,6 +192,17 @@ public class Reservation {
 			long currentTime = System.currentTimeMillis();
 
 			//conn = connector.getConnection();
+=======
+		}*/
+	}
+
+	public StatisticResult book(String plane_no, String seat_no, long userid) {
+		Connection conn = connection;
+		try {
+			long currentTime = System.currentTimeMillis();
+
+//			conn = connector.getConnection();
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 			PreparedStatement ps = conn.prepareStatement(
 					"SELECT * "
 					+ "FROM seat "
@@ -175,24 +215,25 @@ public class Reservation {
 			ResultSet rs = ps.executeQuery();
 
 			if(!rs.next()) {
-				return ReturnTypes.other_error;
+				return StatisticResult.BOOKING_OTHER_ERROR;
 			}
 
 			if(rs.getString("reserved") == null) {
-				return ReturnTypes.not_reserved;
+				return StatisticResult.BOOKING_NOT_RESERVED;
 			}
 
 			if(!rs.getString("reserved").equals(String.valueOf(userid))) {
-				return ReturnTypes.reserved_other;
+				return StatisticResult.BOOKING_RESERVED_OTHER;
 			}
 
 			if(rs.getLong("booking_time") < currentTime - EXPIRES_AFTER) {
-				return ReturnTypes.reservation_timeout;
+				return StatisticResult.BOOKING_RESERVATION_TIMEOUT;
 			}
 
 			if(rs.getString("booked") != null) {
-				return ReturnTypes.occupied;
+				return StatisticResult.BOOKING_OCCUPIED;
 			}
+<<<<<<< HEAD
 			
 			try {
 				Thread.sleep(Toolkit.getSleepTime(10, 70));
@@ -200,6 +241,9 @@ public class Reservation {
 				Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 			}
 
+=======
+			Thread.sleep(Toolkit.getSleepTime(5, 100));
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 			ps = conn.prepareStatement(
 					"UPDATE seat "
 					+ "SET booked = ?, booking_time = ? "
@@ -210,21 +254,29 @@ public class Reservation {
 			ps.setString(4, seat_no);
 
 			if(ps.executeUpdate() > 0) {
-				return ReturnTypes.success;
+				return StatisticResult.BOOKED_SUCCESS;
 			} else {
-				return ReturnTypes.other_error;
+				return StatisticResult.BOOKED_ERROR;
 			}
 		} catch(SQLException ex) {
 			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
+<<<<<<< HEAD
 			return ReturnTypes.other_error;
 		} finally {
 			/*
+=======
+			return StatisticResult.BOOKING_OTHER_ERROR;
+		} catch(InterruptedException ex) {
+			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
+		}/* finally {
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 			if(conn != null) {
 				try {
 					conn.close();
 				} catch(SQLException ignore) {
 				}
 			}
+<<<<<<< HEAD
 			*/
 		}
 	}
@@ -233,6 +285,16 @@ public class Reservation {
 		//Connection conn = null;
 		try {
 			//conn = connector.getConnection();
+=======
+		}*/
+		return StatisticResult.BOOKING_OTHER_ERROR;
+	}
+
+	public int bookAll(String plane_no, long userid) {
+		Connection conn = connection;
+		try {
+//			conn = connector.getConnection();
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 			PreparedStatement ps = conn.prepareStatement(
 					"UPDATE seat "
 					+ "SET reserved = ?, booked = ?, booking_time = ? "
@@ -249,23 +311,37 @@ public class Reservation {
 		} catch(SQLException ex) {
 			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 			return -1;
+<<<<<<< HEAD
 		} finally {
 			/*
+=======
+		}/* finally {
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 			if(conn != null) {
 				try {
 					conn.close();
 				} catch(SQLException ignore) {
 				}
 			}
+<<<<<<< HEAD
 			*/
 		}
+=======
+		}*/
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 	}
 
 	public int clearAllBookings(String plane_no) {
 		System.out.println("CLEAR ALL BOOKINGS");
+<<<<<<< HEAD
 		//Connection conn = null;
 		try {
 			//conn = connector.getConnection();
+=======
+		Connection conn = connection;
+		try {
+//			conn = connector.getConnection();
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 			PreparedStatement ps = conn.prepareStatement(
 					"UPDATE seat "
 					+ "SET booked = null, reserved = null, booking_time = null "
@@ -276,14 +352,19 @@ public class Reservation {
 		} catch(SQLException ex) {
 			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 			return -1;
+<<<<<<< HEAD
 		} finally {
 			/*
+=======
+		}/* finally {
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 			if(conn != null) {
 				try {
 					conn.close();
 				} catch(SQLException ignore) {
 				}
 			}
+<<<<<<< HEAD
 			*/
 		}
 	}
@@ -292,6 +373,15 @@ public class Reservation {
 		//Connection conn = null;
 		try {
 			//conn = connector.getConnection();
+=======
+		}*/
+	}
+
+	public boolean isAllBooked(String plane_no) {
+		Connection conn = connection;
+		try {
+//			conn = connector.getConnection();
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 			PreparedStatement ps = conn.prepareStatement(
 					"SELECT count(*) as count "
 					+ "FROM seat "
@@ -300,20 +390,27 @@ public class Reservation {
 			ps.setString(idx++, plane_no);
 			ResultSet results = ps.executeQuery();
 			if(results.next()) {
-				return results.getInt("count") == 0;
+				int count = results.getInt("count");
+				ps.close();
+				return count == 0;
 			}
 			throw new RuntimeException("Something is rotten in the state of Denmark");
 		} catch(SQLException ex) {
 			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 			return false;
+<<<<<<< HEAD
 		} finally {
 			/*
+=======
+		}/* finally {
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 			if(conn != null) {
 				try {
 					conn.close();
 				} catch(SQLException ignore) {
 				}
 			}
+<<<<<<< HEAD
 					*/
 		}
 	}
@@ -322,6 +419,15 @@ public class Reservation {
 		//Connection conn = null;
 		try {
 			//conn = connector.getConnection();
+=======
+		}*/
+	}
+
+	public boolean isAllReserved(String plane_no) {
+		Connection conn = connection;
+		try {
+//			conn = connector.getConnection();
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 			PreparedStatement ps = conn.prepareStatement(
 					"SELECT count(*) as count "
 					+ "FROM seat "
@@ -330,20 +436,27 @@ public class Reservation {
 			ps.setString(idx++, plane_no);
 			ResultSet results = ps.executeQuery();
 			if(results.next()) {
-				return results.getInt("count") == 0;
+				int count = results.getInt("count");
+				ps.close();
+				return count == 0;
 			}
 			throw new RuntimeException("Something is rotten in the state of Denmark");
 		} catch(SQLException ex) {
 			Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 			return false;
+<<<<<<< HEAD
 		} finally {
 			/*
+=======
+		}/* finally {
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 			if(conn != null) {
 				try {
 					conn.close();
 				} catch(SQLException ignore) {
 				}
 			}
+<<<<<<< HEAD
 			*/
 		}
 	}
@@ -356,5 +469,13 @@ public class Reservation {
 				Logger.getLogger(Reservation.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
+=======
+		}*/
+	}
+
+	@Override
+	public void close() throws Exception {
+		connection.close();
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 	}
 }

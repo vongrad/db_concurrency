@@ -44,7 +44,7 @@ public class OraclePoolConnector implements IConnector {
 		
 		//cpds.setMinPoolSize(5);
 		cpds.setAcquireIncrement(5);
-		cpds.setMaxPoolSize(10);
+		cpds.setMaxPoolSize(11); // also one for master thread.
 		cpds.setAutoCommitOnClose(true);
 		return cpds;
 	}

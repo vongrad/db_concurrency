@@ -113,10 +113,6 @@ public class Master implements Runnable, IStatistics {
 		}
 	}
 
-<<<<<<< HEAD
-	private void spawnClient(ThreadPoolExecutor executor) {
-		executor.execute(new Client(conn, nextThreadClientId(), getPlaneNr()));
-=======
 	private void spawnClient(ThreadPoolExecutor executor) throws SQLException {
 		executor.execute(new Client(conn.getConnection(), nextThreadClientId(), getPlaneNr(), this));
 	}
@@ -139,6 +135,5 @@ public class Master implements Runnable, IStatistics {
 		for(StatisticResult result : statCount.keySet()) {
 			System.out.println(result.toString() + " = " + statCount.get(result));
 		}
->>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 	}
 }

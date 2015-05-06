@@ -21,16 +21,49 @@ public class Client implements Runnable {
 	private StatisticResult bookingCode;
 	private IStatistics stats;
 
+<<<<<<< HEAD
+	public Client(IConnector connector, int clientid, String plane_nr) {
+		this.plane_nr = plane_nr;
+		this.clientid = clientid;
+		this.reservation = new Reservation(connector);;
+=======
 	public Client(Connection connection, int clientid, String plane_nr, IStatistics stats) {
 		this.plane_nr = plane_nr;
 		this.clientId = clientid;
 		this.reservation = new Reservation(connection);
 		this.stats = stats;
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 	}
 
 	@Override
 	public void run() {
 		try {
+<<<<<<< HEAD
+			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " START");
+			sleepThisThreadRandom(1, 500);
+			reservedSeatNr = reservation.reserve(plane_nr, clientid);
+			if(reservedSeatNr == null) {
+				Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " NO RESERVATION");
+				System.out.println("Client [" + clientid + "]: Could not get RESERVATION");
+				return;
+			}
+
+			sleepThisThreadRandom(5, 500);
+			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " AFTER SLEEP");
+
+			if(!makeBooking(25)) {
+				Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " DON'T NEED BOOKING");
+				System.out.println("Client [" + clientid + "]: Decided to NO BOOKING");
+				return;
+			}
+
+			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " BEFORE BOOKING");
+			bookingCode = reservation.book(plane_nr, reservedSeatNr, clientid);
+			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientid + " FINISHED BOOKING");
+			System.out.println("Client [" + clientid + "]: " + bookingCode);
+		} finally {
+			reservation.closeConnection();
+=======
 			Logger.getLogger(Client.class.getName()).log(Level.INFO, "Client: " + this.clientId + " START");
 			//sleepThisThreadRandom(Reservation.EXPIRES_AFTER / 10, Reservation.EXPIRES_AFTER);
 			reservedSeatNr = reservation.reserve(plane_nr, clientId);
@@ -63,6 +96,7 @@ public class Client implements Runnable {
 			} catch(Exception ex) {
 				Logger.getLogger(Client.class.getName()).log(Level.SEVERE, null, ex);
 			}
+>>>>>>> 0e42f38c51a2424c1ec65744739582f4acbd3358
 		}
 	}
 
